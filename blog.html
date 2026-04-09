@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+
+<html lang="tr">
+<head>
+<meta charset="utf-8"/>
+<title>Prompt.ly – Tüm Bloglar</title>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="Prompt.ly blog yazıları – tüm bloglar tek sayfada." name="description"/>
+<style>
+    *{ box-sizing:border-box; margin:0; padding:0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    body{ background: radial-gradient(circle at top, #0236a5 0, #091221 55%, #020712 100%); color:#f5f5ff; min-height:100vh; }
+    a{ color:inherit; text-decoration:none; }
+
+    /* Header (ana site ile uyumlu) */
+    .site-header{ max-width:1080px; margin:0 auto; padding:18px 20px 8px; }
+    .header-row{ display:grid; grid-template-columns: 1fr auto 1fr; align-items:center; gap:14px; }
+    .header-spacer{ min-width:1px; }
+    .brand{ justify-self:center; display:flex; align-items:center; }
+    .logo-image{ height:56px; width:auto; max-width:360px; display:block; filter: brightness(0) invert(1); }
+
+    .header-tools{ display:flex; align-items:center; gap:10px; justify-content:flex-end; flex-wrap:wrap; }
+    .search-wrap{ position:relative; display:flex; align-items:center; gap:8px; }
+    #blog-search{
+      width: 260px;
+      padding: 9px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(5,10,25,0.85);
+      color: #f5f5ff;
+      font-size: 13px;
+      outline: none;
+    }
+    #blog-search:focus{ border-color:#0585e6; box-shadow: 0 0 0 1px rgba(5,133,230,0.35); }
+
+    .btn-ghost{
+      padding: 9px 14px;
+      border-radius: 999px;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.25);
+      color: rgba(235,235,255,0.95);
+      font-size: 13px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space:nowrap;
+    }
+    .btn-ghost:hover{ background: rgba(9,18,33,0.9); }
+
+    .nav-pill{
+      margin-top:12px;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      flex-wrap:wrap;
+      gap:18px;
+      padding:12px 18px;
+      border-radius:999px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.14);
+      box-shadow: 0 18px 60px rgba(0,0,0,0.35);
+    }
+    .nav-pill a{ font-size:14px; opacity:0.92; padding:6px 6px; border-radius:999px; }
+    .nav-pill a:hover{ opacity:1; }
+    .nav-pill a[aria-current="page"]{ opacity:1; }
+
+    @media (max-width:768px){
+      .header-row{ grid-template-columns:1fr; justify-items:center; }
+      .header-tools{ justify-content:center; }
+      #blog-search{ width: min(360px, 80vw); }
+    }
+
+    /* Page */
+    main{ max-width:1080px; margin: 0 auto; padding: 8px 20px 60px; }
+    .page-head{ margin-top:18px; display:flex; align-items:flex-end; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+    h1{ font-size: clamp(24px, 3.2vw, 34px); line-height:1.12; }
+    .subtitle{ margin-top:10px; font-size:13px; line-height:1.7; color: rgba(230,230,255,0.82); max-width: 760px; }
+
+    /* Blog Cards */
+    .blog-grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-top: 18px; }
+
+    .blog-card{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      border-radius: 18px;
+      overflow:hidden;
+      background: rgba(9,18,33,0.96);
+      border: 1px solid rgba(255,255,255,0.14);
+      box-shadow: 0 10px 28px rgba(0,0,0,0.45);
+      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+    .blog-card:hover{ transform: translateY(-3px); border-color: rgba(5,133,230,0.75); box-shadow: 0 18px 45px rgba(0,0,0,0.60); }
+
+    .blog-img{ height:150px; width:100%; object-fit:cover; display:block; transform: scale(1.02); transition: transform .28s ease; }
+    .blog-card:hover .blog-img{ transform: scale(1.06); }
+
+    .blog-body{ padding: 12px 14px 14px; display:flex; flex-direction:column; gap:8px; }
+
+    .blog-top{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .tag{ font-size:11px; padding: 4px 10px; border-radius:999px; border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); }
+    .meta{ font-size:11px; opacity:0.8; }
+
+    .blog-title{ font-size:16px; line-height:1.25; font-weight:650; }
+    .blog-excerpt{ font-size:13px; line-height:1.7; color: rgba(230,230,255,0.82); }
+
+    .readmore{ margin-top:2px; font-size:12px; opacity:0.95; display:inline-flex; align-items:center; gap:8px; }
+
+    .empty{ margin-top: 18px; padding: 14px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.14); background: rgba(9,18,33,0.78); display:none; }
+
+
+.site-footer{
+  margin-top: 64px;
+  background: radial-gradient(1200px 500px at 20% 0%, rgba(88, 101, 242, .20), transparent 60%),
+              radial-gradient(900px 400px at 80% 20%, rgba(254, 3, 105, .14), transparent 55%),
+              linear-gradient(180deg, rgba(9,18,33,1) 0%, rgba(6,10,20,1) 100%);
+  border-top: 1px solid rgba(255,255,255,.08);
+  padding: 44px 0 28px;
+}
+
+.footer-container{
+  width: min(1100px, 92%);
+  margin: 0 auto;
+}
+
+.footer-grid{
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr;
+  gap: 42px;
+  align-items: start;
+}
+
+.footer-title{
+  margin: 0 0 14px;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: .2px;
+}
+
+.footer-name{
+  color: #2d76ff; /* mavi */
+}
+
+.footer-brand-accent{
+  color: #fe0369; /* pembe */
+}
+
+.footer-desc{
+  margin: 0 0 18px;
+  line-height: 1.6;
+  color: rgba(255,255,255,.72);
+  max-width: 420px;
+}
+
+.footer-social{
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.social-btn{
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.08);
+  transition: transform .15s ease, background .15s ease, border-color .15s ease;
+}
+
+.social-btn:hover{
+  transform: translateY(-2px);
+  background: rgba(255,255,255,.10);
+  border-color: rgba(255,255,255,.16);
+}
+
+.social-btn img{
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  filter: grayscale(1) brightness(1.3);
+  opacity: .95;
+}
+
+.footer-heading{
+  margin: 0 0 12px;
+  font-size: 16px;
+  font-weight: 700;
+  color: rgba(255,255,255,.86);
+}
+
+.footer-links{
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.footer-links a{
+  color: rgba(255,255,255,.65);
+  text-decoration: none;
+  transition: color .15s ease;
+}
+
+.footer-links a:hover{
+  color: rgba(255,255,255,.92);
+}
+
+.footer-bottom{
+  margin-top: 38px;
+  text-align: center;
+  color: rgba(255,255,255,.55);
+  line-height: 1.8;
+  font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 900px){
+  .footer-grid{
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 520px){
+  .footer-grid{
+    grid-template-columns: 1fr;
+  }
+}
+
+  </style>
+</head>
+<body>
+<header class="site-header">
+<div class="header-row">
+<div aria-hidden="true" class="header-spacer"></div>
+<a aria-label="Prompt.ly ana sayfaya git" class="brand" href="index.html">
+<img class="logo-image" src="LOGOOo.png"/>
+</a>
+<div class="header-tools">
+<div class="search-wrap">
+<input aria-label="Bloglarda ara" autocomplete="off" id="blog-search" placeholder="Bloglarda ara (başlık)..." type="search"/>
+</div>
+<a class="btn-ghost" href="index.html#blog">Ana sayfadaki blog alanı</a>
+</div>
+</div>
+<nav aria-label="Ana menü" class="nav-pill">
+<a href="index.html#hakkinda">Hakkında</a>
+<a href="prompts.html">Tüm Promptlar</a>
+<a href="index.html#one-cikan">Öne Çıkan</a>
+<a href="index.html#ozellikler">Neler yapabilirsin?</a>
+<a href="index.html#nasil-calisir">Nasıl Çalışır?</a>
+<a href="index.html#prompt-olustur">Prompt Oluştur</a>
+<a aria-current="page" href="blog.html">Blog</a>
+<a href="index.html#uyelik">Üyelik</a>
+<a href="index.html#sss">SSS</a>
+<a href="index.html#iletisim">İletişim</a>
+</nav>
+</header>
+<main>
+<div class="page-head">
+<div>
+<h1>Tüm Bloglar</h1>
+<p class="subtitle">Blog kartlarından birine tıkla → yazının tamamı ayrı sayfada açılsın. Üstteki arama ile başlık üzerinden hızlıca filtreleyebilirsin.</p>
+</div>
+<a class="btn-ghost" href="index.html">← Ana sayfa</a>
+</div>
+<section aria-label="Blog listesi" class="blog-grid" id="blogGrid">
+<a class="blog-card" data-title="Bir Prompt ile Başlayan Yolculuk" href="blogs/blog1.html">
+<img alt="Blog kapak görseli" class="blog-img" onerror="this.style.display='none'" src="instagram.png"/>
+<div class="blog-body">
+<div class="blog-top">
+<span class="tag">İlham</span>
+<span class="meta">11 Ocak 2026 • 4 dk</span>
+</div>
+<div class="blog-title">Bir Prompt ile Başlayan Yolculuk</div>
+<div class="blog-excerpt">Yaratıcılığın yeni dili promptlar. İyi bir promptun neden sadece komut değil; niyet, bağlam ve hayal gücü olduğunu konuşuyoruz.</div>
+<div class="readmore">Devamını oku →</div>
+</div>
+</a>
+<a class="blog-card" data-title="Görünür Olmak Yetmez: Dijital Dünyada Hatırlanmak Nasıl Mümkün Olur?" href="blogs/blog2.html">
+<img alt="Blog kapak görseli" class="blog-img" onerror="this.style.display='none'" src="instagram.png"/>
+<div class="blog-body">
+<div class="blog-top">
+<span class="tag">Pazarlama</span>
+<span class="meta">11 Ocak 2026 • 5 dk</span>
+</div>
+<div class="blog-title">Görünür Olmak Yetmez: Dijital Dünyada Hatırlanmak Nasıl Mümkün Olur?</div>
+<div class="blog-excerpt">Kalabalık dijital dünyada hatırlanmanın yolu: strateji, ton ve doğru anlatım. Prompt yazımı pazarlamanın gizli silahı olabilir.</div>
+<div class="readmore">Devamını oku →</div>
+</div>
+</a>
+<a class="blog-card" data-title="Görsel Üretimde Stil ve Kısıt Kullanımı" href="blogs/blog3.html">
+<div class="blog-body">
+<div class="blog-top">
+<span class="tag">Görsel</span>
+<span class="meta">11 Ocak 2026 • 4 dk</span>
+</div>
+<div class="blog-title">Görsel Üretimde Stil ve Kısıt Kullanımı</div>
+<div class="blog-excerpt">Ürettiğin görselin kalitesi; stil, bağlam ve kısıtların netliğine bağlı. Daha tutarlı sonuçlar için pratik ipuçları.</div>
+<div class="readmore">Devamını oku →</div>
+</div>
+</a>
+</section>
+<div class="empty" id="emptyState">Bu arama ile eşleşen blog bulunamadı.</div>
+</main>
+<footer class="site-footer">
+<div class="footer-container">
+<div class="footer-grid">
+<div class="footer-brand">
+<h3 class="footer-title">
+<span class="footer-name">Şara Nehir İpekçi</span> – <span class="footer-brand-accent">Prompt.ly</span>
+</h3>
+<p class="footer-desc">
+          Yapay zeka promptlarınızı keşfedin, oluşturun ve paylaşın. Yapay zekâ dünyasında yaratıcılığınızı ortaya çıkarın.
+        </p>
+<div class="footer-social">
+<a aria-label="Instagram" href="https://instagram.com/saranehiir" target="_blank">
+<img alt="Instagram" src="assets/icons/instagram.svg"/>
+</a>
+<a aria-label="X" href="https://x.com/saranehiirr" target="_blank">
+<img alt="X" src="assets/icons/x.svg"/>
+</a>
+<a aria-label="Facebook" href="https://facebook.com/kullaniciadi" target="_blank">
+<img alt="Facebook" src="assets/icons/facebook.svg"/>
+</a>
+<a aria-label="YouTube" href="https://youtube.com/kullaniciadi" target="_blank">
+<img alt="YouTube" src="assets/icons/youtube.svg"/>
+</a>
+</div>
+</div>
+<div class="footer-col">
+<h4 class="footer-heading">Platform</h4>
+<ul class="footer-links">
+<li><a href="#">Keşfet</a></li>
+<li><a href="#">Prompt Oluştur</a></li>
+<li><a href="#">Topluluk</a></li>
+<li><a href="#">Trend Prompt</a></li>
+</ul>
+</div>
+<div class="footer-col">
+<h4 class="footer-heading">Kategoriler</h4>
+<ul class="footer-links">
+<li><a href="#">Fotoğraf</a></li>
+<li><a href="#">Video</a></li>
+<li><a href="#">Tasarım</a></li>
+<li><a href="#">Kodlama</a></li>
+<li><a href="#">İçerik</a></li>
+</ul>
+</div>
+<div class="footer-col">
+<h4 class="footer-heading">Destek</h4>
+<ul class="footer-links">
+<li><a href="#">Hakkımızda</a></li>
+<li><a href="#">Yardım Merkezi</a></li>
+<li><a href="#">İletişim</a></li>
+<li><a href="#">Gizlilik Politikası</a></li>
+<li><a href="#">Kullanım Koşulları</a></li>
+</ul>
+</div>
+</div>
+<div class="footer-bottom">
+<p>© 2026 Prompt.ly Tüm hakları saklıdır.</p>
+<p>© 2026 Şara Nehir İpekçi – Bitirme Projesi.</p>
+<p>© 2026 PROF. DR. NURHAN YEL</p>
+</div>
+</div>
+</footer>
+</body>
+</html>
