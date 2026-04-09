@@ -1,0 +1,1775 @@
+  <!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Prompt.ly - Yapay Zeka Prompt Kütüphanesi</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Prompt.ly, yapay zeka için hazır ve özelleştirilebilir prompt kütüphanesidir. Tasarımcılara, yazarlara ve içerik üreticilerine ilham verir.">
+
+<style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at top, #0236a5 0, #091221 55%, #020712 100%);
+      color: #f5f5ff;
+      min-height: 100vh;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    header {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: lowercase;
+      font-size: 20px;
+    }
+
+    .logo-image {
+      height: 40px;
+      width: auto;
+      max-width: 140px;
+      display: block;
+      filter: brightness(0) invert(1);
+    }
+
+    nav {
+      display: flex;
+      gap: 18px;
+      font-size: 14px;
+      opacity: 0.9;
+      align-items: center;
+    }
+
+    nav a:hover {
+      opacity: 1;
+    }
+
+    .header-tools{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .search-wrap{
+      position:relative;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    #site-search{
+      width: 240px;
+      padding: 9px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(5,10,25,0.85);
+      color: #f5f5ff;
+      font-size: 13px;
+      outline: none;
+    }
+
+    #site-search:focus{
+      border-color:#0585e6;
+      box-shadow: 0 0 0 1px rgba(5,133,230,0.35);
+    }
+
+    .search-btn{
+      width: 38px;
+      height: 38px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.06);
+      color:#fff;
+      cursor:pointer;
+    }
+    .search-btn:hover{ filter: brightness(1.1); }
+
+    .search-results{
+      position:absolute;
+      top: 44px;
+      right: 0;
+      width: min(420px, calc(100vw - 40px));
+      max-height: 320px;
+      overflow:auto;
+      display:none;
+      border-radius: 16px;
+      background: rgba(9,18,33,0.98);
+      border: 1px solid rgba(255,255,255,0.14);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.65);
+      padding: 6px;
+      z-index: 999;
+    }
+    .search-results.show{ display:block; }
+
+    .search-item{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      cursor:pointer;
+      border: 1px solid transparent;
+    }
+    .search-item:hover{
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(5,133,230,0.45);
+    }
+    .search-item b{ font-size: 13px; }
+    .search-item small{ font-size: 12px; opacity: 0.8; }
+
+    .search-hit{
+      outline: 2px solid rgba(5,133,230,0.75);
+      box-shadow: 0 0 0 4px rgba(5,133,230,0.18);
+      border-radius: 18px;
+      transition: box-shadow 0.2s ease;
+    }
+
+    @media (max-width: 768px){
+      #site-search{ width: 200px; }
+      nav{ flex-wrap:wrap; justify-content:center; }
+    }
+
+    .btn-small {
+      padding: 8px 16px;
+      border-radius: 999px;
+      border: 1px solid #0585e6;
+      font-size: 13px;
+      background: linear-gradient(135deg, #0585e6, #0236a5);
+      color: #fdfcff;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s, box-shadow 0.2s, filter 0.15s;
+    }
+
+    .btn-small:hover {
+      background: linear-gradient(135deg, #fe0369, #0585e6);
+      box-shadow: 0 0 18px rgba(5, 133, 230, 0.55);
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+    }
+
+    .hero {
+      max-width: 1080px;
+      margin: 20px auto 40px;
+      padding: 0 20px 40px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      gap: 32px;
+      align-items: center;
+    }
+
+    @media (max-width: 768px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+      header {
+        flex-direction: column;
+        gap: 10px;
+      }
+      nav {
+        margin-top: 8px;
+      }
+    }
+
+    .tagline {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.15);
+      margin-bottom: 16px;
+      background: rgba(9,18,33,0.7);
+    }
+.tagline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.15);
+  margin-bottom: 16px;
+  background: rgba(9,18,33,0.7);
+  box-shadow: 0 0 0 rgba(5,133,230,0.0);
+  animation: taglinePulse 6s ease-in-out infinite;
+}
+
+@keyframes taglinePulse {
+  0% {
+    box-shadow: 0 0 0 rgba(5,133,230,0.0);
+  }
+  50% {
+    box-shadow: 0 0 16px rgba(5,133,230,0.45);
+  }
+  100% {
+    box-shadow: 0 0 0 rgba(5,133,230,0.0);
+  }
+}
+
+
+    .tag-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #4ade80;
+      box-shadow: 0 0 10px #4ade80;
+    }
+
+    h1 {
+      font-size: clamp(32px, 4vw, 42px);
+      line-height: 1.1;
+      margin-bottom: 14px;
+    }
+
+    h1 span {
+@keyframes headingShimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+      background: linear-gradient(120deg, #0585e6, #fe0369, #0585e6);
+  background-size: 220% 220%;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: headingShimmer 8s ease-in-out infinite;
+    }
+
+    .hero-sub {
+      font-size: 15px;
+      line-height: 1.6;
+      max-width: 480px;
+      color: rgba(232, 233, 255, 0.8);
+      margin-bottom: 22px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .btn-primary {
+      padding: 10px 20px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #0585e6, #fe0369);
+      border: none;
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
+      transition: transform 0.1s, box-shadow 0.15s, filter 0.15s;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 16px 35px rgba(0, 0, 0, 0.65);
+      filter: brightness(1.05);
+    }
+
+    .btn-ghost {
+      padding: 10px 18px;
+      border-radius: 999px;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.25);
+      color: rgba(235,235,255,0.9);
+      font-size: 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-ghost:hover {
+      background: rgba(9,18,33,0.9);
+    }
+
+    .mini-info {
+      font-size: 12px;
+      color: rgba(190, 192, 230, 0.95);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .mini-info span {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .mini-dot {
+      width: 3px;
+      height: 3px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.4);
+    }
+
+    .hero-card {
+      background: radial-gradient(circle at top, rgba(5, 133, 230, 0.45), transparent 55%);
+  border-radius: 24px;
+  padding: 16px;
+  border: 1px solid rgba(255,255,255,0.15);
+  box-shadow: 0 24px 80px rgba(0,0,0,0.7);
+  position: relative;
+  overflow: hidden;
+  transform: translateY(0);
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+  animation: heroFloat 12s ease-in-out infinite;
+}
+
+.hero-card:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 32px 90px rgba(0,0,0,0.85);
+}
+
+@keyframes heroFloat {
+  0%   { transform: translateY(0); }
+  50%  { transform: translateY(-6px); }
+  100% { transform: translateY(0); }
+    }
+
+    .phone-frame {
+      border-radius: 24px;
+      padding: 10px;
+      background: radial-gradient(circle at top left, #0585e6, #091221 40%, #020712 100%);
+      border: 1px solid rgba(255,255,255,0.18);
+      max-width: 320px;
+      margin: 0 auto;
+    }
+
+    .phone-inner {
+      background: rgba(5,5,20,0.94);
+      border-radius: 18px;
+      padding: 12px 10px 14px;
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+
+    .phone-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 11px;
+      color: rgba(230,230,255,0.8);
+    }
+
+    .phone-pills {
+      display: flex;
+      gap: 6px;
+      font-size: 10px;
+    }
+
+    .pill {
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .prompt-list {
+      margin-top: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 240px;
+      overflow-y: auto;
+    }
+
+    .prompt-item {
+      padding: 8px 9px;
+      border-radius: 10px;
+      background: rgba(10,10,40,0.9);
+      border: 1px solid rgba(255,255,255,0.1);
+      font-size: 11px;
+    }
+
+    .prompt-title {
+      font-weight: 600;
+      margin-bottom: 2px;
+      font-size: 11px;
+    }
+
+    .prompt-tags {
+      margin-top: 4px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      font-size: 9px;
+      opacity: 0.85;
+    }
+
+    .prompt-tag {
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .glow-orb {
+      position: absolute;
+  width: 190px;
+  height: 190px;
+  background: radial-gradient(circle, rgba(254,3,105,0.4), transparent 70%);
+  top: -30px;
+  right: -40px;
+  pointer-events: none;
+  filter: blur(1px);
+  opacity: 0.9;
+  animation: orbFloat 14s ease-in-out infinite alternate;
+}
+
+@keyframes orbFloat {
+  0% {
+    transform: translate(0,0) scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translate(-10px,6px) scale(1.05);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(6px,-4px) scale(0.98);
+    opacity: 0.75;
+  }
+    }
+
+    .section {
+      max-width: 1080px;
+      margin: 0 auto 40px;
+      padding: 0 20px 40px;
+    }
+
+    .section-title {
+      font-size: 20px;
+      margin-bottom: 14px;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .feature-card {
+      background: rgba(9,18,33,0.95);
+      border-radius: 18px;
+      padding: 14px 14px 16px;
+      border: 1px solid rgba(255,255,255,0.12);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .feature-card h3 {
+      font-size: 15px;
+      margin-bottom: 6px;
+    }
+
+    /* PROMPT OLUŞTURMA BÖLÜMÜ */
+    .prompt-builder {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      gap: 24px;
+      align-items: stretch;
+    }
+
+    .prompt-form-card,
+    .prompt-preview-card {
+      background: rgba(9,18,33,0.97);
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.12);
+      padding: 16px 16px 18px;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.55);
+    }
+
+    .prompt-form-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .prompt-form-description {
+      font-size: 13px;
+      color: rgba(220,220,255,0.8);
+      margin-bottom: 14px;
+    }
+
+    .prompt-form-row {
+      margin-bottom: 12px;
+    }
+
+    .prompt-form-row label {
+      display: block;
+      font-size: 12px;
+      margin-bottom: 4px;
+      color: rgba(230,230,255,0.9);
+    }
+
+    .prompt-input,
+    .prompt-select,
+    .prompt-textarea {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(5,10,25,0.95);
+      color: #f5f5ff;
+      font-size: 13px;
+      padding: 8px 10px;
+      outline: none;
+    }
+
+    .prompt-textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .prompt-input:focus,
+    .prompt-select:focus,
+    .prompt-textarea:focus {
+      border-color: #0585e6;
+      box-shadow: 0 0 0 1px rgba(5,133,230,0.4);
+    }
+
+    .prompt-builder-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+      font-size: 11px;
+    }
+
+    .prompt-builder-tag {
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(5,10,25,0.9);
+    }
+
+    .prompt-builder-footer {
+      margin-top: 10px;
+      font-size: 11px;
+      color: rgba(200,200,240,0.8);
+    }
+
+    .prompt-builder-footer span {
+      opacity: 0.8;
+    }
+
+    .prompt-generate-btn {
+      margin-top: 6px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: none;
+      background: linear-gradient(135deg,#0585e6,#fe0369);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .prompt-generate-btn:hover {
+      filter: brightness(1.05);
+    }
+
+    .prompt-preview-header {
+      font-size: 12px;
+      margin-bottom: 10px;
+      color: rgba(220,220,255,0.9);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .prompt-preview-chip {
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(5,10,25,0.9);
+    }
+
+    .prompt-preview-inner {
+      margin-top: 4px;
+    }
+
+    .prompt-preview-title {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .prompt-preview-body {
+      font-size: 12px;
+      line-height: 1.5;
+      color: rgba(225,225,255,0.85);
+    }
+
+    .prompt-preview-meta {
+      margin-top: 8px;
+      font-size: 11px;
+      color: rgba(190,190,230,0.9);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .prompt-preview-badge {
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(5,10,25,0.9);
+      font-size: 10px;
+    }
+
+    /* Kopyalama butonu */
+    .prompt-copy-btn {
+      margin-top: 12px;
+      padding: 8px 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.25);
+      background: rgba(10,15,30,0.9);
+      color: #ffffff;
+      font-size: 13px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: 0.2s ease;
+    }
+
+    .prompt-copy-btn:hover {
+      background: rgba(20,30,55,1);
+      box-shadow: 0 0 12px rgba(5,133,230,0.4);
+      transform: translateY(-1px);
+    }
+
+    @media (max-width: 900px) {
+      .prompt-builder {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    footer {
+      padding: 50px 20px;
+      background: linear-gradient(135deg, #1b1636 0%, #0b0a1a 100%);
+      color: rgba(235,235,255,0.9);
+      font-size: 14px;
+      margin-top: 20px;
+    }
+
+    .footer-grid {
+      max-width: 1150px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr 1fr;
+      gap: 40px;
+    }
+
+    .footer-title {
+      font-size: 20px;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg,#0585e6,#fe0369);
+      -webkit-background-clip:text;
+      color:transparent;
+    }
+
+    .footer-social {
+      display:flex;
+      gap:14px;
+      margin-top:8px;
+    }
+
+    .footer-social img {
+      width:24px;
+      height:24px;
+      display:block;
+      filter:invert(1);
+      opacity:0.85;
+    }
+
+    .footer-social img.instagram {
+      filter:none;
+    }
+
+    .footer-col h3 {
+      margin-bottom:12px;
+      font-size:15px;
+      font-weight:600;
+    }
+
+    .footer-col ul {
+      list-style:none;
+      padding:0;
+      line-height:1.8;
+    }
+
+    .footer-col a {
+      opacity:0.85;
+    }
+
+    .footer-col a:hover {
+      opacity:1;
+    }
+
+    .footer-bottom {
+      text-align:center;
+      margin-top:40px;
+      font-size:12px;
+      opacity:0.7;
+      line-height:1.6;
+    }
+
+    @media (max-width: 800px) {
+      .footer-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .footer-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+/* Öne çıkan promptlar kart grid */
+.prompt-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 22px;
+  margin-top: 18px;
+}
+
+.prompt-card {
+  background: rgba(9,18,33,0.96);
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.16);
+  overflow: hidden;
+  box-shadow: 0 10px 28px rgba(0,0,0,0.55);
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s;
+  cursor: pointer;
+}
+
+.prompt-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 45px rgba(0,0,0,0.75);
+  border-color: rgba(5,133,230,0.85);
+}
+
+/* Görsel alanı */
+.prompt-card-image-wrap {
+  position: relative;
+  height: 150px;
+  overflow: hidden;
+}
+
+.prompt-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transform: scale(1.02);
+  transition: transform 0.3s ease;
+}
+
+.prompt-card:hover .prompt-card-img {
+  transform: scale(1.06);
+}
+
+/* Üstteki küçük badge */
+.prompt-card-badge {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  background: rgba(5,10,25,0.85);
+  border: 1px solid rgba(255,255,255,0.35);
+  color: #f5f5ff;
+}
+
+/* Metin alanı */
+.prompt-card-content {
+  padding: 12px 14px 10px;
+}
+
+.prompt-card-tag-row {
+  margin-bottom: 4px;
+}
+
+.prompt-card-chip {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.18);
+}
+
+.prompt-card-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.prompt-card-text {
+  font-size: 13px;
+  color: rgba(230,230,255,0.85);
+  margin-bottom: 8px;
+}
+
+.prompt-card-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: rgba(200,200,240,0.85);
+}
+
+
+  
+/* BLOG */
+.section-subtitle{
+  margin-top: -6px;
+  margin-bottom: 14px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: rgba(230,230,255,0.80);
+}
+.blog-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+.blog-card{
+  display:flex;
+  flex-direction:column;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(9,18,33,0.96);
+  border: 1px solid rgba(255,255,255,0.14);
+  text-decoration:none;
+  color: inherit;
+  box-shadow: 0 10px 28px rgba(0,0,0,0.45);
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.blog-card:hover{
+  transform: translateY(-3px);
+  border-color: rgba(5,133,230,0.7);
+  box-shadow: 0 18px 45px rgba(0,0,0,0.60);
+}
+.blog-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 10px;
+}
+.blog-tag{
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.06);
+}
+.blog-meta{
+  font-size: 11px;
+  opacity: 0.75;
+}
+.blog-card h3{
+  font-size: 16px;
+  line-height: 1.25;
+  margin: 0;
+}
+.blog-card p{
+  font-size: 13px;
+  line-height: 1.7;
+  margin: 0;
+  color: rgba(230,230,255,0.82);
+}
+.blog-cta{
+  margin-top: 4px;
+  font-size: 12px;
+  opacity: 0.9;
+}
+body.light .section-subtitle{ color: rgba(20,25,45,0.78); }
+body.light .blog-card{
+  background: rgba(255,255,255,0.92);
+  border-color: rgba(0,0,0,0.10);
+  box-shadow: 0 10px 26px rgba(0,0,0,0.18);
+}
+body.light .blog-card p{ color: rgba(20,25,45,0.85); }
+body.light .blog-tag{ border-color: rgba(0,0,0,0.14); background: rgba(0,0,0,0.03); }
+
+/* SSS (FAQ) */
+.faq{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  margin-top: 14px;
+}
+.faq-item{
+  background: rgba(9,18,33,0.96);
+  border:1px solid rgba(255,255,255,0.14);
+  border-radius: 16px;
+  padding: 10px 12px;
+  box-shadow: 0 10px 28px rgba(0,0,0,0.45);
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.faq-item:hover{
+  transform: translateY(-2px);
+  border-color: rgba(5,133,230,0.7);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.65);
+}
+.faq-question{
+  cursor:pointer;
+  list-style:none;
+  font-size: 14px;
+  font-weight: 650;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  color: rgba(245,245,255,0.96);
+}
+.faq-question::-webkit-details-marker{ display:none; }
+.faq-question::after{
+  content:"+";
+  font-size: 18px;
+  opacity: 0.9;
+  transition: transform 0.18s ease;
+}
+.faq-item[open] .faq-question::after{
+  content:"–";
+}
+.faq-answer{
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255,255,255,0.10);
+  font-size: 13px;
+  line-height: 1.7;
+  color: rgba(230,230,255,0.85);
+}
+
+
+
+/* AUTH MODAL */
+.modal-backdrop{
+  position:fixed; inset:0;
+  background: rgba(0,0,0,0.55);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  z-index:9999;
+}
+.modal-backdrop.show{ display:flex; }
+
+.modal{
+  width:min(560px, 100%);
+  border-radius:20px;
+  background: rgba(9,18,33,0.98);
+  border:1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 28px 90px rgba(0,0,0,0.75);
+  padding:16px;
+}
+
+.modal-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:12px;
+}
+.modal-title{ font-size:16px; font-weight:700; }
+.modal-sub{ font-size:12px; color: rgba(220,220,255,0.75); margin-top:2px; }
+
+.modal-close{
+  background: rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.14);
+  color:#fff;
+  border-radius:12px;
+  padding:6px 10px;
+  cursor:pointer;
+}
+.modal-close:hover{ filter: brightness(1.08); }
+
+.modal-tabs{
+  display:flex;
+  gap:10px;
+  margin-bottom:12px;
+}
+.tab{
+  flex:1;
+  padding:10px 12px;
+  border-radius:999px;
+  background: rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.14);
+  color: rgba(235,235,255,0.9);
+  cursor:pointer;
+  font-size:13px;
+}
+.tab.active{
+  background: linear-gradient(135deg, rgba(5,133,230,0.9), rgba(254,3,105,0.75));
+  border-color: rgba(255,255,255,0.18);
+}
+
+.modal-form{ display:flex; flex-direction:column; gap:10px; }
+.modal-form.hidden{ display:none; }
+
+.form-row label{ font-size:12px; color: rgba(230,230,255,0.9); display:block; margin-bottom:4px; }
+.hint{ font-size:12px; color: rgba(230,230,255,0.85); margin-top:2px; opacity:0.9; min-height:16px; }
+
+.modal-divider{
+  height:1px;
+  background: rgba(255,255,255,0.12);
+  margin:14px 0;
+}
+
+.pro-box{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:center;
+  flex-wrap:wrap;
+  padding:12px;
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,0.12);
+  background: radial-gradient(circle at top left, rgba(5,133,230,0.18), rgba(9,18,33,0.98));
+}
+.pro-title{ font-size:13px; font-weight:700; margin-bottom:2px; }
+.pro-text{ font-size:12px; color: rgba(220,220,255,0.8); }
+
+.pro-actions{ display:flex; gap:10px; }
+.w-100{ width:100%; }
+
+/* === PROMPTS PAGE HEADER: anasayfa ile aynı düzen === */
+.site-header{max-width:1080px;margin:0 auto;padding:18px 20px 8px;display:block;}
+.site-header .header-row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:14px;}
+.header-spacer{min-width:1px;}
+.brand{justify-self:center;}
+.brand-logo{height:56px;max-width:360px;}
+.nav-pill{
+  margin-top:12px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:18px;
+  padding:12px 18px;
+  border-radius:999px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 18px 60px rgba(0,0,0,0.35);
+}
+.nav-pill a{font-size:14px;opacity:0.92;padding:6px 6px;border-radius:999px;}
+.nav-pill a:hover{opacity:1;}
+.nav-pill a[aria-current="page"]{opacity:1;}
+
+@media (max-width:768px){
+  .site-header .header-row{grid-template-columns:1fr;justify-items:center;}
+  .header-tools{justify-content:center;}
+  #site-search{width:min(360px, 74vw);}
+  .nav-pill{gap:12px;}
+}
+
+
+
+/* === PROMPT DETAIL: sol görsel + sağ prompt (split layout) === */
+.prompt-split{
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 24px;
+  align-items: start;
+  margin-top: 14px;
+}
+
+/* Görsel alanı daha büyük */
+.prompt-split .prompt-card-image-wrap{
+  height: 520px !important;
+}
+
+/* Detay sayfada görsel TAM görünsün ve sola yaslansın */
+.prompt-split .prompt-card-img{
+  width: 100%;
+  height: 100%;
+  object-fit: contain !important;
+  object-position: left center !important;
+  background: rgba(255,255,255,0.03);
+}
+
+/* Mobilde alt alta */
+@media (max-width: 900px){
+  .prompt-split{
+    grid-template-columns: 1fr;
+  }
+  .prompt-split .prompt-card-image-wrap{
+    height: auto !important;
+  }
+  .prompt-split .prompt-card-img{
+    height: auto !important;
+  }
+}
+
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="header-row">
+    <div class="header-spacer" aria-hidden="true"></div>
+
+    <a class="logo brand" href="../index.html" aria-label="Prompt.ly ana sayfaya git">
+      <img src="../LOGOOo.png" class="logo-image brand-logo" alt="Prompt.ly Logo">
+    </a>
+
+    <div class="header-tools">
+      <div class="search-wrap">
+        <input id="site-search" type="search" placeholder="Sitede ara..." autocomplete="off" aria-label="Site içinde ara">
+        <button class="search-btn" id="search-btn" type="button" aria-label="Ara">🔎</button>
+        <div class="search-results" id="search-results" role="listbox" aria-label="Arama sonuçları"></div>
+      </div>
+
+      <button class="btn-small" id="auth-btn">Giriş Yap</button>
+    </div>
+  </div>
+
+  <nav class="nav-pill" aria-label="Ana menü">
+    <a href="../index.html#hakkinda">Hakkında</a>
+    <a href="../prompt.html" aria-current="page">Tüm Promptlar</a>
+    <a href="../index.html#one-cikan">Öne Çıkan</a>
+    <a href="../index.html#ozellikler">Neler yapabilirsin?</a>
+    <a href="../index.html#nasil-calisir">Nasıl Çalışır?</a>
+    <a href="../index.html#prompt-olustur">Prompt Oluştur</a>
+    <a href="../index.html#blog">Blog</a>
+    <a href="../index.html#uyelik">Üyelik</a>
+    <a href="../index.html#sss">SSS</a>
+    <a href="../index.html#iletisim">İletişim</a>
+  </nav>
+</header>
+
+  <main>
+    <section class="section" id="prompt-detail">
+      <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+        <h1 style="font-size:26px; margin:0;"> Takı Markası E-Ticaret Sitesi</h1>
+        <a href="../prompt.html" class="btn-ghost" style="padding:8px 14px;">← Tüm Promptlara Dön</a>
+      </div>
+
+      <p class="section-subtitle" style="margin-top:10px;">
+       El yapımı takı veya butik aksesuar markaları için zarif ve satış odaklı bir e-ticaret web sitesi kurgulamak için hazırlanmış prompt.
+      </p>
+
+<div class="prompt-split">
+  <!-- SOL: Görsel -->
+  <div class="feature-card" style="padding:0; overflow:hidden;">
+    <div class="prompt-card-image-wrap" style="height:520px;">
+      <img id="promptImage" src="../assets/takı-markası.jpg" alt="Takı Markası E-Ticaret Sitesi" class="prompt-card-img">
+<div id="imgError" style="display:none; padding:10px 12px; font-size:12px; color:#ffd6e7; border-top:1px solid rgba(255,255,255,0.12); background:rgba(254,3,105,0.08);">
+  Görsel yüklenemedi.
+</div>
+
+<script>
+  (function () {
+    const img = document.getElementById("promptImage");
+    const err = document.getElementById("imgError");
+    if (!img) return;
+
+    const candidates = [
+      "../assets/takı-markası.jpg",   // prompts klasörü içindeki assets
+      "../assets/takı-markası.jpg"  // kök assets klasörü (alternatif)
+    ];
+
+    let i = 0;
+
+    function showError(msg) {
+      if (!err) return;
+      err.style.display = "block";
+      err.innerHTML = "Görsel yüklenemedi: <b>" + msg + "</b><br><small>Denediğim yollar: " + candidates.join(" | ") + "</small>";
+    }
+
+    img.onerror = function () {
+      i++;
+      if (i < candidates.length) {
+        img.src = candidates[i] + "?v=" + Date.now();
+      } else {
+        showError("Dosya yolu/isim uyuşmuyor veya tarayıcı erişemiyor.");
+      }
+    };
+
+    // cache kırma
+    img.src = candidates[0] + "?v=" + Date.now();
+  })();
+</script>
+
+      <span class="prompt-card-badge">Web Sitesi/E-Ticaret</span>
+    </div>
+  </div>
+
+  <!-- SAĞ: Prompt Metni -->
+  <div class="feature-card" style="padding:16px;">
+    <div class="prompt-preview-title" style="font-size:16px; margin-bottom:8px;">Prompt Metni</div>
+
+    <div class="prompt-preview-body" id="promptText" style="white-space:pre-wrap;">
+Design a luxury jewelry e-commerce website interface, elegant beige and soft gold palette, clean product cards, featured collections, premium typography, modern shopping layout, refined feminine branding, minimal luxury aesthetic, high resolution online store UI mockup
+    </div>
+
+    <button class="prompt-copy-btn" id="copy-detail" type="button" style="margin-top:14px;">
+      <span>📋</span> Prompt’u kopyala
+    </button>
+
+    <div class="prompt-preview-meta" style="margin-top:10px;">
+      <span class="prompt-preview-badge">💡 Araç: Lovable, Bolt.new, v0.dev</span>
+      <span class="prompt-preview-badge">🌍 Dil: TR,EN</span>
+      <span class="prompt-preview-badge">🏷️ Kategori:Web Sitesi/E-Ticaret</span>
+    </div>
+  </div>
+</div>
+    </section>
+
+    <script>
+      // sadece bu sayfa için kopyalama
+      document.getElementById("copy-detail")?.addEventListener("click", () => {
+        const text = document.getElementById("promptText")?.innerText || "";
+        navigator.clipboard.writeText(text).then(() => {
+          const btn = document.getElementById("copy-detail");
+          const old = btn.innerHTML;
+          btn.innerHTML = "✔ Kopyalandı";
+          setTimeout(() => (btn.innerHTML = old), 1200);
+        });
+      });
+    </script>
+  </main>
+
+<footer>
+    <div class="footer-grid">
+      <div>
+        <h2 class="footer-title">Şara Nehir İpekçi – Prompt.ly</h2>
+        <p style="margin-bottom: 18px; line-height:1.7;">
+          Yapay zeka promptlarınızı keşfedin, oluşturun ve paylaşın.
+          Yapay zekâ dünyasında yaratıcılığınızı ortaya çıkarın.
+        </p>
+        <div class="footer-social">
+          <a href="https://instagram.com/saranehiir" target="_blank" aria-label="Instagram">
+            <img src="../assets/icons/instagram.svg" alt="Instagram">
+          </a>
+
+          <a href="https://x.com/saranehiirr" target="_blank" aria-label="X">
+            <img src="../assets/icons/x.svg" alt="X">
+          </a>
+
+          <a href="https://facebook.com/kullaniciadi" target="_blank" aria-label="Facebook">
+            <img src="../assets/icons/facebook.svg" alt="Facebook">
+          </a>
+
+          <a href="https://youtube.com/kullaniciadi" target="_blank" aria-label="YouTube">
+            <img src="../assets/icons/youtube.svg" alt="YouTube">
+          </a>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <h3>Platform</h3>
+        <ul>
+          <li><a href="#">Keşfet</a></li>
+          <li><a href="#">Prompt Oluştur</a></li>
+          <li><a href="#">Topluluk</a></li>
+          <li><a href="#">Trend Prompt</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h3>Kategoriler</h3>
+        <ul>
+          <li><a href="#">Fotoğraf</a></li>
+          <li><a href="#">Video</a></li>
+          <li><a href="#">Tasarım</a></li>
+          <li><a href="#">Kodlama</a></li>
+          <li><a href="#">İçerik</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h3>Destek</h3>
+        <ul>
+          <li><a href="#">Hakkımızda</a></li>
+          <li><a href="#">Yardım Merkezi</a></li>
+          <li><a href="#">İletişim</a></li>
+          <li><a href="#">Gizlilik Politikası</a></li>
+          <li><a href="#">Kullanım Koşulları</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>© 2026 Prompt.ly Tüm hakları saklıdır.</span><br>
+      <span>© 2026 Şara Nehir İpekçi – Bitirme Projesi.</span><br>
+      <span>© 2026 PROF. DR. NURHAN YEL</span>
+    </div>
+  </footer>
+
+<!-- JS: canlı önizleme + kopyalama -->
+  <div aria-hidden="true" class="modal-backdrop" id="auth-backdrop">
+<div aria-labelledby="auth-title" aria-modal="true" class="modal" role="dialog">
+<div class="modal-head">
+<div>
+<div class="modal-title" id="auth-title">Prompt.ly Hesabı</div>
+<div class="modal-sub">Demo giriş/üyelik (MVP prototip)</div>
+</div>
+<button aria-label="Kapat" class="modal-close" id="auth-close">✕</button>
+</div>
+<div class="modal-tabs">
+<button class="tab active" id="tab-login" type="button">Giriş Yap</button>
+<button class="tab" id="tab-signup" type="button">Üye Ol</button>
+</div>
+<!-- LOGIN -->
+<form class="modal-form" id="login-form">
+<div class="form-row">
+<label>E-posta</label>
+<input class="prompt-input" id="login-email" placeholder="ornek@mail.com" required="" type="email"/>
+</div>
+<div class="form-row">
+<label>Şifre</label>
+<input class="prompt-input" id="login-pass" placeholder="••••••••" required="" type="password"/>
+</div>
+<button class="btn-primary w-100" type="submit">Giriş Yap</button>
+<div class="hint" id="login-hint"></div>
+</form>
+<!-- SIGNUP -->
+<form class="modal-form hidden" id="signup-form">
+<div class="form-row">
+<label>Ad Soyad</label>
+<input class="prompt-input" id="signup-name" placeholder="Şara Nehir İpekçi" required="" type="text"/>
+</div>
+<div class="form-row">
+<label>E-posta</label>
+<input class="prompt-input" id="signup-email" placeholder="ornek@mail.com" required="" type="email"/>
+</div>
+<div class="form-row">
+<label>Şifre</label>
+<input class="prompt-input" id="signup-pass" minlength="6" placeholder="En az 6 karakter" required="" type="password"/>
+</div>
+<button class="btn-primary w-100" type="submit">Hesap Oluştur</button>
+<div class="hint" id="signup-hint"></div>
+</form>
+<div class="modal-divider"></div>
+<div class="pro-box">
+<div class="pro-left">
+<div class="pro-title">Prompt.ly PRO (Demo)</div>
+<div class="pro-text">Aylık <strong>49 TL</strong> — Premium özellikler, özel kitler, kayıtlı kütüphane.</div>
+</div>
+<div class="pro-actions">
+<button class="btn-ghost" id="upgrade-pro" type="button">PRO’ya Yükselt</button>
+<button class="btn-ghost" id="logout-btn" type="button">Çıkış Yap</button>
+</div>
+</div>
+</div>
+</div>
+
+  <script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const titleInput = document.getElementById("prompt-title-input");
+      const textInput = document.getElementById("prompt-text-input");
+      const aiInput = document.getElementById("prompt-ai-input");
+      const categorySelect = document.getElementById("prompt-category-input");
+      const langRadios = document.querySelectorAll("input[name='prompt-lang']");
+
+      const previewTitle = document.getElementById("prompt-preview-title");
+      const previewBody = document.getElementById("prompt-preview-body");
+      const previewAi = document.getElementById("prompt-preview-ai");
+      const previewLang = document.getElementById("prompt-preview-lang");
+      const previewCategoryChip = document.getElementById("prompt-preview-category-chip");
+
+      const copyBtn = document.getElementById("prompt-copy-btn");
+
+      const categoryLabels = {
+        web: "🌐 Web & Kod",
+        tasarim: "🎨 Tasarım & Görsel",
+        icerik: "✍️ Metin & İçerik",
+        sosyal: "📱 Sosyal Medya",
+        akademik: "🎓 Akademik"
+      };
+
+      titleInput && titleInput.addEventListener("input", function () {
+        previewTitle.textContent = this.value || "Minimal portfolyo web sitesi tasarımı";
+      });
+
+      textInput && textInput.addEventListener("input", function () {
+        previewBody.textContent = this.value || "“HTML ve CSS ile tek sayfalık, koyu temalı bir portfolyo tasarla. Üstte sabit menü, ortada büyük bir başlık, altta proje kartları ve iletişim alanı olsun. Modern, sade ve okunabilir bir tipografi kullan…”";
+      });
+
+      aiInput && aiInput.addEventListener("input", function () {
+        const value = this.value.trim();
+        previewAi.textContent = value ? ("💡 Araç: " + value) : "💡 Araç: ChatGPT";
+      });
+
+      categorySelect && categorySelect.addEventListener("change", function () {
+        const label = categoryLabels[this.value] || "🌐 Web & Kod";
+        previewCategoryChip.textContent = label;
+      });
+
+      langRadios.forEach(function (radio) {
+        radio.addEventListener("change", function () {
+          const langText = this.value === "EN" ? "🌍 Dil: İngilizce" : "🌍 Dil: Türkçe";
+          previewLang.textContent = langText;
+        });
+      });
+
+      copyBtn && copyBtn.addEventListener("click", function () {
+        const fullPrompt =
+          previewTitle.textContent + "\n\n" +
+          previewBody.textContent + "\n\n" +
+          previewAi.textContent + " | " +
+          previewLang.textContent + " | " +
+          previewCategoryChip.textContent;
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(fullPrompt).then(function () {
+            const original = copyBtn.innerHTML;
+            copyBtn.innerHTML = "✔ Kopyalandı";
+            setTimeout(function () {
+              copyBtn.innerHTML = '<span>📋</span> Prompt’u kopyala';
+            }, 1500);
+          }).catch(function () {
+            alert("Kopyalama bu tarayıcıda desteklenmiyor, metni elle kopyalayabilirsin 💙");
+          });
+        } else {
+          alert("Kopyalama bu tarayıcıda desteklenmiyor, metni elle kopyalayabilirsin 💙");
+        }
+      });
+
+      // === AUTH (Demo) ===
+      const authBtn = document.getElementById("auth-btn");
+      const backdrop = document.getElementById("auth-backdrop");
+      const closeBtn = document.getElementById("auth-close");
+
+      const tabLogin = document.getElementById("tab-login");
+      const tabSignup = document.getElementById("tab-signup");
+
+      const loginForm = document.getElementById("login-form");
+      const signupForm = document.getElementById("signup-form");
+
+      const loginHint = document.getElementById("login-hint");
+      const signupHint = document.getElementById("signup-hint");
+
+      const upgradeProBtn = document.getElementById("upgrade-pro");
+      const logoutBtn = document.getElementById("logout-btn");
+
+      const LS_USERS = "promptly_users_v1";
+      const LS_SESSION = "promptly_session_v1";
+
+      function loadUsers() {
+        try { return JSON.parse(localStorage.getItem(LS_USERS)) || []; }
+        catch { return []; }
+      }
+      function saveUsers(users) {
+        localStorage.setItem(LS_USERS, JSON.stringify(users));
+      }
+      function getSession() {
+        try { return JSON.parse(localStorage.getItem(LS_SESSION)); }
+        catch { return null; }
+      }
+      function setSession(session) {
+        localStorage.setItem(LS_SESSION, JSON.stringify(session));
+      }
+      function clearSession() {
+        localStorage.removeItem(LS_SESSION);
+      }
+
+      function openModal() {
+        if (!backdrop) return;
+        backdrop.classList.add("show");
+        backdrop.setAttribute("aria-hidden", "false");
+        if (loginHint) loginHint.textContent = "";
+        if (signupHint) signupHint.textContent = "";
+      }
+      function closeModal() {
+        if (!backdrop) return;
+        backdrop.classList.remove("show");
+        backdrop.setAttribute("aria-hidden", "true");
+      }
+
+      function switchToLogin() {
+        tabLogin?.classList.add("active");
+        tabSignup?.classList.remove("active");
+        loginForm?.classList.remove("hidden");
+        signupForm?.classList.add("hidden");
+      }
+      function switchToSignup() {
+        tabSignup?.classList.add("active");
+        tabLogin?.classList.remove("active");
+        signupForm?.classList.remove("hidden");
+        loginForm?.classList.add("hidden");
+      }
+
+      function updateNavbar() {
+        if (!authBtn) return;
+        const session = getSession();
+        if (!session) {
+          authBtn.textContent = "Giriş Yap";
+          return;
+        }
+        const proTag = session.isPro ? " • PRO" : "";
+        authBtn.textContent = `Merhaba, ${session.name.split(" ")[0]}${proTag}`;
+      }
+
+      // Events
+      authBtn?.addEventListener("click", openModal);
+      closeBtn?.addEventListener("click", closeModal);
+      backdrop?.addEventListener("click", (e) => { if (e.target === backdrop) closeModal(); });
+
+      tabLogin?.addEventListener("click", switchToLogin);
+      tabSignup?.addEventListener("click", switchToSignup);
+
+      signupForm?.addEventListener("submit", (e) => {
+        e.preventDefault();
+        if (signupHint) signupHint.textContent = "";
+
+        const name = document.getElementById("signup-name").value.trim();
+        const email = document.getElementById("signup-email").value.trim().toLowerCase();
+        const pass = document.getElementById("signup-pass").value;
+
+        const users = loadUsers();
+        const exists = users.find(u => u.email === email);
+        if (exists) {
+          if (signupHint) signupHint.textContent = "Bu e-posta ile zaten bir hesap var. Giriş yapmayı dene.";
+          switchToLogin();
+          const le = document.getElementById("login-email");
+          if (le) le.value = email;
+          return;
+        }
+
+        users.push({ name, email, pass, isPro:false, createdAt: Date.now() });
+        saveUsers(users);
+
+        setSession({ name, email, isPro:false });
+        if (signupHint) signupHint.textContent = "Hesap oluşturuldu ✅";
+        updateNavbar();
+      });
+
+      loginForm?.addEventListener("submit", (e) => {
+        e.preventDefault();
+        if (loginHint) loginHint.textContent = "";
+
+        const email = document.getElementById("login-email").value.trim().toLowerCase();
+        const pass = document.getElementById("login-pass").value;
+
+        const users = loadUsers();
+        const user = users.find(u => u.email === email && u.pass === pass);
+        if (!user) {
+          if (loginHint) loginHint.textContent = "E-posta veya şifre yanlış. (Demo: Üye olmayı dene)";
+          return;
+        }
+
+        setSession({ name: user.name, email: user.email, isPro: !!user.isPro });
+        if (loginHint) loginHint.textContent = "Giriş başarılı ✅";
+        updateNavbar();
+      });
+
+      upgradeProBtn?.addEventListener("click", () => {
+        const session = getSession();
+        if (!session) {
+          switchToLogin();
+          if (loginHint) loginHint.textContent = "Önce giriş yapmalısın.";
+          return;
+        }
+        session.isPro = true;
+        setSession(session);
+
+        const users = loadUsers();
+        const idx = users.findIndex(u => u.email === session.email);
+        if (idx >= 0) {
+          users[idx].isPro = true;
+          saveUsers(users);
+        }
+
+        updateNavbar();
+        if (loginHint) loginHint.textContent = "PRO aktif ✅ (Demo)";
+        if (signupHint) signupHint.textContent = "PRO aktif ✅ (Demo)";
+      });
+
+      logoutBtn?.addEventListener("click", () => {
+        clearSession();
+        updateNavbar();
+        if (loginHint) loginHint.textContent = "Çıkış yapıldı.";
+        if (signupHint) signupHint.textContent = "Çıkış yapıldı.";
+      });
+
+
+      
+
+      
+      // === SITE SEARCH ===
+      const searchInput = document.getElementById("site-search");
+      const searchBtn = document.getElementById("search-btn");
+      const resultsBox = document.getElementById("search-results");
+      const searchItems = [];
+
+      function addSearchItem(label, sub, el){
+        if (!label || !el) return;
+        searchItems.push({ label, sub, el });
+      }
+
+      // Bölümler (h2)
+      document.querySelectorAll("main .section").forEach((sec) => {
+        const title = sec.querySelector(".section-title");
+        if (title) addSearchItem(title.textContent.trim(), "Bölüm", sec);
+      });
+
+      // Öne çıkan promptlar (kart başlıkları)
+      document.querySelectorAll(".prompt-card-title").forEach((t) => {
+        addSearchItem(t.textContent.trim(), "Öne çıkan prompt", t.closest(".prompt-card"));
+      });
+
+      // Blog başlıkları
+      document.querySelectorAll(".blog-card h3").forEach((t) => {
+        addSearchItem(t.textContent.trim(), "Blog", t.closest(".blog-card"));
+      });
+
+      // SSS soruları
+      document.querySelectorAll(".faq-question").forEach((q) => {
+        addSearchItem(q.textContent.trim(), "SSS", q.closest(".faq-item"));
+      });
+
+      function clearHits(){
+        document.querySelectorAll(".search-hit").forEach(el => el.classList.remove("search-hit"));
+      }
+
+      function openResults(){ resultsBox?.classList.add("show"); }
+      function closeResults(){ resultsBox?.classList.remove("show"); }
+
+      function scrollToEl(el){
+        if (!el) return;
+        clearHits();
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        el.classList.add("search-hit");
+        setTimeout(() => el.classList.remove("search-hit"), 1400);
+      }
+
+      function renderResults(q){
+        if (!resultsBox) return;
+        const query = (q || "").trim().toLowerCase();
+        if (!query){
+          resultsBox.innerHTML = "";
+          closeResults();
+          return;
+        }
+        const matches = searchItems
+          .filter(i => (i.label || "").toLowerCase().includes(query))
+          .slice(0, 10);
+
+        if (!matches.length){
+          resultsBox.innerHTML = '<div class="search-item" style="cursor:default;"><b>Sonuç bulunamadı</b><small>Farklı bir kelime deneyebilirsin.</small></div>';
+          openResults();
+          return;
+        }
+
+        resultsBox.innerHTML = matches.map((i, idx) => (
+          `<div class="search-item" data-idx="${idx}" role="option" tabindex="0">
+             <b>${i.label}</b>
+             <small>${i.sub || ""}</small>
+           </div>`
+        )).join("");
+        openResults();
+
+        // click / keyboard
+        resultsBox.querySelectorAll(".search-item").forEach((node, idx) => {
+          const item = matches[idx];
+          node.addEventListener("click", () => {
+            closeResults();
+            scrollToEl(item.el);
+          });
+          node.addEventListener("keydown", (e) => {
+            if (e.key === "Enter"){
+              closeResults();
+              scrollToEl(item.el);
+            }
+          });
+        });
+      }
+
+      searchInput?.addEventListener("input", (e) => renderResults(e.target.value));
+      searchBtn?.addEventListener("click", () => renderResults(searchInput?.value || ""));
+
+      searchInput?.addEventListener("keydown", (e) => {
+        if (e.key === "Enter"){
+          const first = resultsBox?.querySelector(".search-item");
+          if (first){
+            first.click();
+          } else {
+            renderResults(searchInput.value);
+          }
+        }
+        if (e.key === "Escape") closeResults();
+      });
+
+      document.addEventListener("click", (e) => {
+        const inSearch = e.target.closest(".search-wrap");
+        if (!inSearch) closeResults();
+      });
+
+
+// === FAQ: tek seferde 1 soru açık kalsın ===
+      const faqItems = document.querySelectorAll(".faq-item");
+      faqItems.forEach((item) => {
+        item.addEventListener("toggle", () => {
+          if (item.open) {
+            faqItems.forEach((other) => {
+              if (other !== item) other.open = false;
+            });
+          }
+        });
+      });
+
+    });
+  
+</script>
+
+<script>
+// === PROMPT CARD CLICK -> DETAIL PAGE ===
+document.querySelectorAll(".prompt-card[data-href]").forEach((card) => {
+  card.addEventListener("click", () => {
+    window.location.href = card.dataset.href;
+  });
+
+  card.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " " ) {
+      e.preventDefault();
+      window.location.href = card.dataset.href;
+    }
+  });
+});
+</script>
+
+</body>
+</html>
+
